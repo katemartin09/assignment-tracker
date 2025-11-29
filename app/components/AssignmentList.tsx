@@ -1,6 +1,6 @@
 "use client";
 
-import { Assignment, Status } from "../lib/storage";
+import { Assignment, AssignmentStatus } from "../lib/storage";
 import AssignmentItem from "./AssignmentItem";
 
 export default function AssignmentList({
@@ -10,7 +10,7 @@ export default function AssignmentList({
   assignments: Assignment[];
   setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>;
 }) {
-  function handleStatusChange(id: string, status: Status) {
+  function handleStatusChange(id: string, status: AssignmentStatus) {
     setAssignments((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status } : a))
     );
