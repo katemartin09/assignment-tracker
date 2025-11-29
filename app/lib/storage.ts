@@ -56,12 +56,20 @@ export type GradeRecord = {
   scorePercent: number; // 0–100
 };
 
+// Extra events for the calendar
+export type ExtraEvent = {
+  id: string;
+  title: string;
+  date: string; // ISO yyyy-mm-dd
+};
+
 // ---- Keys ----
 const COURSES_KEY = "courses_v1";
 const ASSIGNMENTS_KEY = "assignments_v2";
 const COMPLETED_ASSIGNMENTS_KEY = "completed_assignments_v1";
 const GRADE_CONFIG_KEY = "grade_configs_v1";
 const GRADE_RECORDS_KEY = "grade_records_v1";
+const EXTRA_EVENTS_KEY = "extra_events_v1";
 
 // ---- Generic helpers ----
 function safeJSONParse<T>(raw: string | null, fallback: T): T {
@@ -86,19 +94,11 @@ function lsSet<T>(key: string, value: T) {
 
 // ---- Courses ----
 export function loadCourses(): Course[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(COURSES_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Course[];
-  } catch {
-    return [];
-  }
+  return lsGet<Course[]>(COURSES_KEY, []);
 }
 
 export function saveCourses(courses: Course[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(COURSES_KEY, JSON.stringify(courses));
+  lsSet<Course[]>(COURSES_KEY, courses);
 }
 
 // ---- Assignments (active) ----
@@ -107,7 +107,7 @@ export function loadAssignments(): Assignment[] {
 }
 
 export function saveAssignments(assignments: Assignment[]) {
-  lsSet(ASSIGNMENTS_KEY, assignments);
+  lsSet<Assignment[]>(ASSIGNMENTS_KEY, assignments);
 }
 
 // ---- Completed assignments (for Grades) ----
@@ -116,7 +116,7 @@ export function loadCompletedAssignments(): Assignment[] {
 }
 
 export function saveCompletedAssignments(assignments: Assignment[]) {
-  lsSet(COMPLETED_ASSIGNMENTS_KEY, assignments);
+  lsSet<Assignment[]>(COMPLETED_ASSIGNMENTS_KEY, assignments);
 }
 
 // ---- Grade configs & records ----
@@ -125,17 +125,24 @@ export function loadGradeConfigs(): CourseGradeConfig[] {
 }
 
 export function saveGradeConfigs(configs: CourseGradeConfig[]) {
-  lsSet(COURSE_GRADE_CONFIG_KEY, configs);
+  lsSet<CourseGradeConfig[]>(GRADE_CONFIG_KEY, configs);
 }
-// minor typo fix: declare constant name
-const COURSE_GRADE_CONFIG_KEY = GRADE_CONFIG_KEY;
 
 export function loadGradeRecords(): GradeRecord[] {
   return lsGet<GradeRecord[]>(GRADE_RECORDS_KEY, []);
 }
 
 export function saveGradeRecords(records: GradeRecord[]) {
-  lsSet(GRADE_RECORDS_KEY, records);
+  lsSet<GradeRecord[]>(GRADE_RECORDS_KEY, records);
+}
+
+// ---- Extra calendar events ----
+export function loadExtraEvents(): ExtraEvent[] {
+  return lsGet<ExtraEvent[]>(EXTRA_EVENTS_KEY, []);
+}
+
+export function saveExtraEvents(events: ExtraEvent[]) {
+  lsSet<ExtraEvent[]>(EXTRA_EVENTS_KEY, events);
 }
 
 // ---- Date helpers ----

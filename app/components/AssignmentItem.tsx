@@ -1,8 +1,8 @@
 "use client";
 
-import { Assignment, getDaysRemaining, Status } from "../lib/storage";
+import { Assignment, getDaysRemaining, AssignmentStatus } from "../lib/storage";
 
-function statusClasses(status: Status) {
+function statusClasses(status: AssignmentStatus) {
   switch (status) {
     case "to-start":
       return "bg-red-100 text-red-800";
@@ -37,7 +37,7 @@ export default function AssignmentItem({
   onStatusChange,
 }: {
   assignment: Assignment;
-  onStatusChange: (id: string, status: Status) => void;
+  onStatusChange: (id: string, status: AssignmentStatus) => void;
 }) {
   const days = getDaysRemaining(assignment.dueDate);
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -62,7 +62,7 @@ export default function AssignmentItem({
           )}`}
           value={assignment.status}
           onChange={(e) =>
-            onStatusChange(assignment.id, e.target.value as Status)
+            onStatusChange(assignment.id, e.target.value as AssignmentStatus)
           }
         >
           <option value="to-start">To start</option>
@@ -73,7 +73,7 @@ export default function AssignmentItem({
 
       {/* Subject */}
       <div className="text-center font-medium">
-        {assignment.subject || "—"}
+        {assignment.subjectName || "—"}
       </div>
 
       {/* Type */}

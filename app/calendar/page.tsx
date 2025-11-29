@@ -3,19 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Assignment,
+  ExtraEvent,
   formatDisplayDate,
   loadAssignments,
   loadCompletedAssignments,
+  loadExtraEvents,
   saveAssignments,
   saveCompletedAssignments,
+  saveExtraEvents,
   todayISO,
 } from "../lib/storage";
-
-type ExtraEvent = {
-  id: string;
-  title: string;
-  date: string; // ISO
-};
 
 export default function CalendarPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -24,10 +21,17 @@ export default function CalendarPage() {
   const [eventTitle, setEventTitle] = useState("");
   const [eventDate, setEventDate] = useState("");
 
+  // Load data once on mount
   useEffect(() => {
     setAssignments(loadAssignments());
     setCompleted(loadCompletedAssignments());
+    setEvents(loadExtraEvents());
   }, []);
+
+  // Persist custom events whenever they change
+  useEffect(() => {
+    saveExtraEvents(events);
+  }, [events]);
 
   const allItems = [...assignments, ...completed];
 
@@ -43,24 +47,29 @@ export default function CalendarPage() {
       string,
       { assignments: Assignment[]; events: ExtraEvent[] }
     > = {};
+
     allItems.forEach((a) => {
       if (!map[a.dueDate]) map[a.dueDate] = { assignments: [], events: [] };
       map[a.dueDate].assignments.push(a);
     });
+
     events.forEach((e) => {
       if (!map[e.date]) map[e.date] = { assignments: [], events: [] };
       map[e.date].events.push(e);
     });
+
     return map;
   }, [allItems, events]);
 
   function addEvent(e: React.FormEvent) {
     e.preventDefault();
     if (!eventTitle.trim() || !eventDate) return;
+
     setEvents((prev) => [
       ...prev,
       { id: crypto.randomUUID(), title: eventTitle.trim(), date: eventDate },
     ]);
+
     setEventTitle("");
     setEventDate("");
   }
@@ -76,6 +85,7 @@ export default function CalendarPage() {
       saveAssignments(next);
       return next;
     });
+
     setCompleted((prev) => {
       const next = prev.filter((a) => a.id !== id);
       saveCompletedAssignments(next);
@@ -163,6 +173,7 @@ export default function CalendarPage() {
                     />
                   );
                 }
+
                 const iso = `${year}-${String(month + 1).padStart(
                   2,
                   "0"
@@ -180,6 +191,7 @@ export default function CalendarPage() {
                     <div className="text-right text-[11px] font-semibold text-sky-900">
                       {day}
                     </div>
+
                     <div className="flex flex-col gap-0.5 overflow-y-auto">
                       {/* Assignments with X */}
                       {info?.assignments.map((a) => (
